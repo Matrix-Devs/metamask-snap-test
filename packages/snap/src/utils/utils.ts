@@ -62,8 +62,8 @@ export const isEthereumAddress = (address: string) => {
 export async function authenticateHashDit(persistedUserData: any) {
   const timestamp = Date.now();
   const nonce = uuidv4().replace(/-/g, '');
-  const appId = persistedUserData.userAddress;
-  const appSecret = persistedUserData.messageSignature;
+  const appId = '0x2e1197c3c1ed011cf18de2aae093a678c8e3cc11'; // Switched from persistedUserData.userAddress;
+  const appSecret = 'ba8c459fe4238a6bcdd7a74d15cad05ac5bb21f7d8cf1e8bcf9ed5a067913ad9fdb087b0936f3a9d4572c44aa84d23a76ee1ee52bbbe175ea5a67c374a1ad089'; // Switched from persistedUserData.messageSignature;
 
   const response = await fetch(
     'https://api.hashdit.io/security-api/public/chain/v1/web3/signature',
@@ -90,7 +90,6 @@ export async function authenticateHashDit(persistedUserData: any) {
 
 export async function getHashDitResponse(
   businessName: string,
-  persistedUserData: any,
   transactionUrl?: any,
   transaction?: any,
   chainId?: string,
@@ -131,8 +130,7 @@ export async function getHashDitResponse(
     postBody.trace_id = trace_id;
     postBody.url = transactionUrl;
   }
-  let appId: string;
-  let appSecret: string;
+
 
   const timestamp = Date.now();
   const nonce = uuidv4().replace(/-/g, '');
@@ -142,8 +140,9 @@ export async function getHashDitResponse(
   );
 
   let dataToSign: string;
-  appId = persistedUserData.userAddress;
-  appSecret = persistedUserData.publicKey;
+  const appId = '0x2e1197c3c1ed011cf18de2aae093a678c8e3cc11'; // Switched from persistedUserData.userAddress;
+  const appSecret = 'ba8c459fe4238a6bcdd7a74d15cad05ac5bb21f7d8cf1e8bcf9ed5a067913ad9fdb087b0936f3a9d4572c44aa84d23a76ee1ee52bbbe175ea5a67c374a1ad089'; // Switched from persistedUserData.messageSignature;
+
   url.searchParams.append('business', businessName);
   const query = url.search.substring(1);
   dataToSign = `${appId};${timestamp};${nonce};POST;/security-api/public/chain/v1/web3/detect;${query};${JSON.stringify(
@@ -329,6 +328,7 @@ export async function isEOA(address: any) {
 }
 
 // Perform similarity score to detect address poisoning attacks
+// Note: Won't work in test mode
 export function addressPoisoningDetection(
   userAddresses: string[],
   targetAddresses: string[],
@@ -345,9 +345,9 @@ export function addressPoisoningDetection(
     );
     for (var i = 0; i < similarityResult.length; i++) {
       resultArray.push(
-        row('Your Address', address(similarityResult[i].userAddress)),
-        row('Similar Address', address(similarityResult[i].targetAddress)),
-        row('Risk Level', text(`${similarityResult[i].similarityRiskLevel}`)),
+        text('Your Address'), text(similarityResult[i].userAddress),
+        text('Similar Address'), text(similarityResult[i].targetAddress),
+        text('Risk Level'), text(`${similarityResult[i].similarityRiskLevel}`),
         divider(),
       );
     }

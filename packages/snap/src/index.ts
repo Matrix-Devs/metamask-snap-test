@@ -60,45 +60,6 @@ export const onInstall: OnInstallHandler = async () => {
       ]),
     },
   });
-  try {
-    // Get user's accounts
-    const accounts = await ethereum.request({ method: 'eth_requestAccounts' });
-    const from = accounts[0];
-
-    // Request user to sign a message -> get user's signature -> get user's public key.
-    const message = `Hashdit Security: ${from}, Please sign this message to authenticate the HashDit API.`;
-    const signature = await ethereum.request({
-      method: 'personal_sign',
-      params: [message, from],
-    });
-    let publicKey = extractPublicKeyFromSignature(message, signature, from);
-    publicKey = publicKey.substring(2);
-
-    try {
-      // Save public key here and user address here:
-      await snap.request({
-        method: 'snap_manageState',
-        params: {
-          operation: 'update',
-          newState: {
-            publicKey: publicKey,
-            userAddress: from,
-            messageSignature: signature,
-          },
-        },
-      });
-    } catch (error) {}
-
-    try {
-      const persistedData = await snap.request({
-        method: 'snap_manageState',
-        params: { operation: 'get' },
-      });
-
-      await authenticateHashDit(persistedData); // call HashDit API to authenticate user
-    } catch (error) {}
-    return true;
-  } catch (error) {}
 };
 
 // Handle outgoing transactions.
@@ -124,15 +85,10 @@ export const onTransaction: OnTransactionHandler = async ({
     }
     // Current chain is not supported (not BSC or ETH). Display not supported text.
     if (chainId !== '0x38' && chainId !== '0x1') {
-      // Retrieve saved user's public key to make HashDit API call
-      const persistedUserPublicKey = await snap.request({
-        method: 'snap_manageState',
-        params: { operation: 'get' },
-      });
 
       let contentArray: any[] = [];
       var urlRespData;
-      if (persistedUserPublicKey !== null) {
+
         const poisonResultArray = addressPoisoningDetection(accounts, [
           transaction.to,
         ]);
@@ -142,7 +98,6 @@ export const onTransaction: OnTransactionHandler = async ({
 
         urlRespData = await getHashDitResponse(
           'hashdit_snap_tx_api_url_detection',
-          persistedUserPublicKey,
           transactionOrigin,
         );
         contentArray.push(heading('URL Risk Information'));
@@ -156,33 +111,16 @@ export const onTransaction: OnTransactionHandler = async ({
           ),
           divider(),
         );
-      } else {
-        contentArray.push(
-          heading('HashDit Security Insights'),
-          text('⚠️ The full functionality of HashDit is not working. ⚠️'),
-          text('To resolve this issue, please follow these steps:'),
-          divider(),
-          text(
-            "**(1)** _Click on the 'Reconnect' or 'Install' button on the HashDit website to install the Snap._",
-          ),
-          text(
-            '**(2)** _Install the snap by approving the required permissions._',
-          ),
-          text(
-            '**(3)** _Confirm your identity by signing the provided message._',
-          ),
-          divider(),
-        );
-      }
+      
 
       const transactingValue = parseTransactingValue(transaction.value);
       const nativeToken = getNativeToken(chainId);
 
       contentArray.push(
         heading('Transfer Details'),
-        row('Your Address', address(transaction.from)),
-        row('Amount', text(`${transactingValue} ${nativeToken}`)),
-        row('To', address(transaction.to)),
+        text('Your Address'), text(transaction.from),
+        text('Amount'), text(`${transactingValue} ${nativeToken}`),
+        text('To'), text(transaction.to),
         divider(),
       );
 
@@ -198,16 +136,11 @@ export const onTransaction: OnTransactionHandler = async ({
     }
     // Current chain is supported (BSC or ETH). Display token transfer insights
     else {
-      // Retrieve saved user's public key to make HashDit API call
-      const persistedUserPublicKey = await snap.request({
-        method: 'snap_manageState',
-        params: { operation: 'get' },
-      });
 
       let contentArray: any[] = [];
       var respData;
       var urlRespData;
-      if (persistedUserPublicKey !== null) {
+      
         const poisonResultArray = addressPoisoningDetection(accounts, [
           transaction.to,
         ]);
@@ -217,14 +150,14 @@ export const onTransaction: OnTransactionHandler = async ({
 
         respData = await getHashDitResponse(
           'internal_address_lables_tags',
-          persistedUserPublicKey,
+
           transactionOrigin,
           transaction,
           chainId,
         );
         urlRespData = await getHashDitResponse(
           'hashdit_snap_tx_api_url_detection',
-          persistedUserPublicKey,
+
           transactionOrigin,
         );
 
@@ -255,33 +188,16 @@ export const onTransaction: OnTransactionHandler = async ({
           ),
           divider(),
         );
-      } else {
-        contentArray.push(
-          heading('HashDit Security Insights'),
-          text('⚠️ The full functionality of HashDit is not working. ⚠️'),
-          text('To resolve this issue, please follow these steps:'),
-          divider(),
-          text(
-            "**(1)** _Click on the 'Reconnect' or 'Install' button on the HashDit website to install the Snap._",
-          ),
-          text(
-            '**(2)** _Install the snap by approving the required permissions._',
-          ),
-          text(
-            '**(3)** _Confirm your identity by signing the provided message._',
-          ),
-          divider(),
-        );
-      }
+      
 
       const transactingValue = parseTransactingValue(transaction.value);
       const nativeToken = getNativeToken(chainId);
 
       contentArray.push(
         heading('Transfer Details'),
-        row('Your Address', address(transaction.from)),
-        row('Amount', text(`${transactingValue} ${nativeToken}`)),
-        row('To', address(transaction.to)),
+        text('Your Address'), text(transaction.from),
+        text('Amount'), text(`${transactingValue} ${nativeToken}`),
+        text('To'), text(transaction.to),
         divider(),
       );
 
@@ -303,17 +219,12 @@ export const onTransaction: OnTransactionHandler = async ({
   }
   // Current chain is not supported (Not BSC and not ETH). Only perform URL screening
   if (chainId !== '0x38' && chainId !== '0x1') {
-    // Retrieve saved user's public key to make HashDit API call
-    const persistedUserData = await snap.request({
-      method: 'snap_manageState',
-      params: { operation: 'get' },
-    });
 
     let contentArray: any[] = [];
-    if (persistedUserData !== null) {
+
       const urlRespData = await getHashDitResponse(
         'hashdit_snap_tx_api_url_detection',
-        persistedUserData,
+
         transactionOrigin,
       );
       contentArray = [
@@ -329,45 +240,17 @@ export const onTransaction: OnTransactionHandler = async ({
           'Currently we only support the **BSC Mainnet** and **ETH Mainnet**.',
         ),
       ];
-    } else {
-      contentArray = [
-        heading('HashDit Security Insights'),
-        text('⚠️ The full functionality of HashDit is not working. ⚠️'),
-        text('To resolve this issue, please follow these steps:'),
-        divider(),
-        text(
-          "**(1)** _Click on the 'Reconnect' or 'Install' button on the HashDit website to install the Snap._",
-        ),
-        text(
-          '**(2)** _Install the snap by approving the required permissions._',
-        ),
-        text(
-          '**(3)** _Confirm your identity by signing the provided message._',
-        ),
-        divider(),
-        text(
-          'HashDit Security Insights is not fully supported on this chain. Only URL screening has been performed.',
-        ),
-        text(
-          'Currently we only support the **BSC Mainnet** and **ETH Mainnet**.',
-        ),
-      ];
-    }
+ 
     const content = panel(contentArray);
     return { content };
   } else {
     // Current chain is supported (BSC and ETH).
-    // Retrieve saved user's public key to make HashDit API call
-    const persistedUserPublicKey = await snap.request({
-      method: 'snap_manageState',
-      params: { operation: 'get' },
-    });
 
     let contentArray: any[] = [];
-    if (persistedUserPublicKey !== null) {
+
       const interactionRespData = await getHashDitResponse(
         'hashdit_snap_tx_api_transaction_request',
-        persistedUserPublicKey,
+
         transactionOrigin,
         transaction,
         chainId,
@@ -395,7 +278,7 @@ export const onTransaction: OnTransactionHandler = async ({
       }
       const addressRespData = await getHashDitResponse(
         'internal_address_lables_tags',
-        persistedUserPublicKey,
+
         transactionOrigin,
         transaction,
         chainId,
@@ -441,9 +324,9 @@ export const onTransaction: OnTransactionHandler = async ({
       if (transactingValue > 0) {
         contentArray.push(
           heading('Transfer Details'),
-          row('Your Address', address(transaction.from)),
-          row('Amount', text(`${transactingValue} ${nativeToken}`)),
-          row('To', address(transaction.to)),
+          text('Your Address'), text(transaction.from),
+          text('Amount'), text(`${transactingValue} ${nativeToken}`),
+          text('To'), text(transaction.to),
           divider(),
         );
       }
@@ -456,36 +339,19 @@ export const onTransaction: OnTransactionHandler = async ({
         // Loop through each function parameter and display its values
         for (const param of interactionRespData.function_params) {
           contentArray.push(
-            row('Name:', text(param.name)),
-            row('Type:', text(param.type)),
+            text('Name:'), text(param.name),
+            text('Type:'), text(param.type),
           );
           // If the parameter is 'address' type, then we use address UI for the value
           if (param.type == 'address') {
-            contentArray.push(row('Value:', address(param.value)));
+            contentArray.push(text('Value:'), text(param.value));
           } else {
-            contentArray.push(row('Value:', text(param.value)));
+            contentArray.push(text('Value:'), text(param.value));
           }
           contentArray.push(divider());
         }
       }
-    } else {
-      // User public key not found, display error message to snap
-      contentArray = [
-        heading('HashDit Security Insights'),
-        text('⚠️ The full functionality of HashDit is not working. ⚠️'),
-        text('To resolve this issue, please follow these steps:'),
-        divider(),
-        text(
-          "**(1)** _Click on the 'Reconnect' or 'Install' button on the HashDit website to install the Snap._",
-        ),
-        text(
-          '**(2)** _Install the snap by approving the required permissions._',
-        ),
-        text(
-          '**(3)** _Confirm your identity by signing the provided message._',
-        ),
-      ];
-    }
+    
 
     const content = panel(contentArray);
     return { content };
