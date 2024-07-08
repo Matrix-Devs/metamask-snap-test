@@ -63,7 +63,8 @@ export async function authenticateHashDit(persistedUserData: any) {
   const timestamp = Date.now();
   const nonce = uuidv4().replace(/-/g, '');
   const appId = '0x2e1197c3c1ed011cf18de2aae093a678c8e3cc11'; // Switched from persistedUserData.userAddress;
-  const appSecret = 'ba8c459fe4238a6bcdd7a74d15cad05ac5bb21f7d8cf1e8bcf9ed5a067913ad9fdb087b0936f3a9d4572c44aa84d23a76ee1ee52bbbe175ea5a67c374a1ad089'; // Switched from persistedUserData.messageSignature;
+  const appSecret =
+    'ba8c459fe4238a6bcdd7a74d15cad05ac5bb21f7d8cf1e8bcf9ed5a067913ad9fdb087b0936f3a9d4572c44aa84d23a76ee1ee52bbbe175ea5a67c374a1ad089'; // Switched from persistedUserData.messageSignature;
 
   const response = await fetch(
     'https://api.hashdit.io/security-api/public/chain/v1/web3/signature',
@@ -131,7 +132,6 @@ export async function getHashDitResponse(
     postBody.url = transactionUrl;
   }
 
-
   const timestamp = Date.now();
   const nonce = uuidv4().replace(/-/g, '');
 
@@ -141,7 +141,8 @@ export async function getHashDitResponse(
 
   let dataToSign: string;
   const appId = '0x2e1197c3c1ed011cf18de2aae093a678c8e3cc11'; // Switched from persistedUserData.userAddress;
-  const appSecret = 'ba8c459fe4238a6bcdd7a74d15cad05ac5bb21f7d8cf1e8bcf9ed5a067913ad9fdb087b0936f3a9d4572c44aa84d23a76ee1ee52bbbe175ea5a67c374a1ad089'; // Switched from persistedUserData.messageSignature;
+  const appSecret =
+    'ba8c459fe4238a6bcdd7a74d15cad05ac5bb21f7d8cf1e8bcf9ed5a067913ad9fdb087b0936f3a9d4572c44aa84d23a76ee1ee52bbbe175ea5a67c374a1ad089'; // Switched from persistedUserData.messageSignature;
 
   url.searchParams.append('business', businessName);
   const query = url.search.substring(1);
@@ -345,9 +346,12 @@ export function addressPoisoningDetection(
     );
     for (var i = 0; i < similarityResult.length; i++) {
       resultArray.push(
-        text('Your Address'), text(similarityResult[i].userAddress),
-        text('Similar Address'), text(similarityResult[i].targetAddress),
-        text('Risk Level'), text(`${similarityResult[i].similarityRiskLevel}`),
+        text('Your Address'),
+        text(similarityResult[i].userAddress),
+        text('Similar Address'),
+        text(similarityResult[i].targetAddress),
+        text('Risk Level'),
+        text(`${similarityResult[i].similarityRiskLevel}`),
         divider(),
       );
     }
@@ -384,35 +388,36 @@ function detectSimilarity(
 
       // Compare first 5 hex
       for (var i = 0; i < 5; i++) {
-        if (userAddressConvert[i] == targetAddressCovert[i] && userAddressConvert[addressLength - i] == targetAddressCovert[addressLength - i]) {
+        if (
+          userAddressConvert[i] == targetAddressCovert[i] &&
+          userAddressConvert[addressLength - i] ==
+            targetAddressCovert[addressLength - i]
+        ) {
           similarityScore += 1;
         }
       }
 
       // If there are more than 3 matching prefix or postfix characters, we send a warning to the user.
-      if(similarityScore >= 3){
+      if (similarityScore >= 3) {
         let similarityRiskLevel;
-        switch(similarityScore){
+        switch (similarityScore) {
           case 3:
-            similarityRiskLevel = "⛔ High Risk ⛔"
-            break
+            similarityRiskLevel = '⛔ High Risk ⛔';
+            break;
           case 4:
-            similarityRiskLevel = "⛔ High Risk ⛔"
-            break
+            similarityRiskLevel = '⛔ High Risk ⛔';
+            break;
           case 5:
-            similarityRiskLevel = "🚫 **Critical Risk** 🚫"
-            break
+            similarityRiskLevel = '🚫 **Critical Risk** 🚫';
+            break;
         }
-  
-  
+
         similarityScoreResultArray.push({
           userAddress,
           targetAddress,
           similarityRiskLevel,
         });
       }
-
-      
     }
   }
   return similarityScoreResultArray;

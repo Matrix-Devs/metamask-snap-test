@@ -85,42 +85,43 @@ export const onTransaction: OnTransactionHandler = async ({
     }
     // Current chain is not supported (not BSC or ETH). Display not supported text.
     if (chainId !== '0x38' && chainId !== '0x1') {
-
       let contentArray: any[] = [];
       var urlRespData;
 
-        const poisonResultArray = addressPoisoningDetection(accounts, [
-          transaction.to,
-        ]);
-        if (poisonResultArray.length != 0) {
-          contentArray = poisonResultArray;
-        }
+      const poisonResultArray = addressPoisoningDetection(accounts, [
+        transaction.to,
+      ]);
+      if (poisonResultArray.length != 0) {
+        contentArray = poisonResultArray;
+      }
 
-        urlRespData = await getHashDitResponse(
-          'hashdit_snap_tx_api_url_detection',
-          transactionOrigin,
-        );
-        contentArray.push(heading('URL Risk Information'));
+      urlRespData = await getHashDitResponse(
+        'hashdit_snap_tx_api_url_detection',
+        transactionOrigin,
+      );
+      contentArray.push(heading('URL Risk Information'));
 
-        if (urlRespData.url_risk >= 2) {
-          contentArray.push(text(`**${urlRespData.url_risk_title}**`));
-        }
-        contentArray.push(
-          text(
-            `The URL **${transactionOrigin}** has a risk of **${urlRespData.url_risk}**`,
-          ),
-          divider(),
-        );
-      
+      if (urlRespData.url_risk >= 2) {
+        contentArray.push(text(`**${urlRespData.url_risk_title}**`));
+      }
+      contentArray.push(
+        text(
+          `The URL **${transactionOrigin}** has a risk of **${urlRespData.url_risk}**`,
+        ),
+        divider(),
+      );
 
       const transactingValue = parseTransactingValue(transaction.value);
       const nativeToken = getNativeToken(chainId);
 
       contentArray.push(
         heading('Transfer Details'),
-        text('Your Address'), text(transaction.from),
-        text('Amount'), text(`${transactingValue} ${nativeToken}`),
-        text('To'), text(transaction.to),
+        text('Your Address'),
+        text(transaction.from),
+        text('Amount'),
+        text(`${transactingValue} ${nativeToken}`),
+        text('To'),
+        text(transaction.to),
         divider(),
       );
 
@@ -136,68 +137,69 @@ export const onTransaction: OnTransactionHandler = async ({
     }
     // Current chain is supported (BSC or ETH). Display token transfer insights
     else {
-
       let contentArray: any[] = [];
       var respData;
       var urlRespData;
-      
-        const poisonResultArray = addressPoisoningDetection(accounts, [
-          transaction.to,
-        ]);
-        if (poisonResultArray.length != 0) {
-          contentArray = poisonResultArray;
-        }
 
-        respData = await getHashDitResponse(
-          'internal_address_lables_tags',
+      const poisonResultArray = addressPoisoningDetection(accounts, [
+        transaction.to,
+      ]);
+      if (poisonResultArray.length != 0) {
+        contentArray = poisonResultArray;
+      }
 
-          transactionOrigin,
-          transaction,
-          chainId,
-        );
-        urlRespData = await getHashDitResponse(
-          'hashdit_snap_tx_api_url_detection',
+      respData = await getHashDitResponse(
+        'internal_address_lables_tags',
 
-          transactionOrigin,
-        );
+        transactionOrigin,
+        transaction,
+        chainId,
+      );
+      urlRespData = await getHashDitResponse(
+        'hashdit_snap_tx_api_url_detection',
 
-        if (respData.overall_risk_title != 'Unknown Risk') {
-          contentArray.push(
-            heading('Transaction Screening'),
-            text(`**Overall Risk:** ${respData.overall_risk_title}`),
-            text(`**Risk Overview:** ${respData.overall_risk_detail}`),
-            text(`**Risk Details:** ${respData.transaction_risk_detail}`),
-            divider(),
-          );
-        } else {
-          contentArray.push(
-            heading('Transaction Screening'),
-            text(`**Overall Risk:** ${respData.overall_risk_title}`),
-            divider(),
-          );
-        }
+        transactionOrigin,
+      );
 
-        contentArray.push(heading('URL Risk Information'));
-
-        if (urlRespData.url_risk >= 2) {
-          contentArray.push(text(`**${urlRespData.url_risk_title}**`));
-        }
+      if (respData.overall_risk_title != 'Unknown Risk') {
         contentArray.push(
-          text(
-            `The URL **${transactionOrigin}** has a risk of **${urlRespData.url_risk}**`,
-          ),
+          heading('Transaction Screening'),
+          text(`**Overall Risk:** ${respData.overall_risk_title}`),
+          text(`**Risk Overview:** ${respData.overall_risk_detail}`),
+          text(`**Risk Details:** ${respData.transaction_risk_detail}`),
           divider(),
         );
-      
+      } else {
+        contentArray.push(
+          heading('Transaction Screening'),
+          text(`**Overall Risk:** ${respData.overall_risk_title}`),
+          divider(),
+        );
+      }
+
+      contentArray.push(heading('URL Risk Information'));
+
+      if (urlRespData.url_risk >= 2) {
+        contentArray.push(text(`**${urlRespData.url_risk_title}**`));
+      }
+      contentArray.push(
+        text(
+          `The URL **${transactionOrigin}** has a risk of **${urlRespData.url_risk}**`,
+        ),
+        divider(),
+      );
 
       const transactingValue = parseTransactingValue(transaction.value);
       const nativeToken = getNativeToken(chainId);
 
       contentArray.push(
         heading('Transfer Details'),
-        text('Your Address'), text(transaction.from),
-        text('Amount'), text(`${transactingValue} ${nativeToken}`),
-        text('To'), text(transaction.to),
+        text('Your Address'),
+        text(transaction.from),
+        text('Amount'),
+        text(`${transactingValue} ${nativeToken}`),
+        text('To'),
+        text(transaction.to),
         divider(),
       );
 
@@ -219,28 +221,27 @@ export const onTransaction: OnTransactionHandler = async ({
   }
   // Current chain is not supported (Not BSC and not ETH). Only perform URL screening
   if (chainId !== '0x38' && chainId !== '0x1') {
-
     let contentArray: any[] = [];
 
-      const urlRespData = await getHashDitResponse(
-        'hashdit_snap_tx_api_url_detection',
+    const urlRespData = await getHashDitResponse(
+      'hashdit_snap_tx_api_url_detection',
 
-        transactionOrigin,
-      );
-      contentArray = [
-        heading('URL Risk Information'),
-        text(
-          `The URL **${transactionOrigin}** has a risk of **${urlRespData.url_risk}**`,
-        ),
-        divider(),
-        text(
-          'HashDit Security Insights is not fully supported on this chain. Only URL screening has been performed.',
-        ),
-        text(
-          'Currently we only support the **BSC Mainnet** and **ETH Mainnet**.',
-        ),
-      ];
- 
+      transactionOrigin,
+    );
+    contentArray = [
+      heading('URL Risk Information'),
+      text(
+        `The URL **${transactionOrigin}** has a risk of **${urlRespData.url_risk}**`,
+      ),
+      divider(),
+      text(
+        'HashDit Security Insights is not fully supported on this chain. Only URL screening has been performed.',
+      ),
+      text(
+        'Currently we only support the **BSC Mainnet** and **ETH Mainnet**.',
+      ),
+    ];
+
     const content = panel(contentArray);
     return { content };
   } else {
@@ -248,110 +249,114 @@ export const onTransaction: OnTransactionHandler = async ({
 
     let contentArray: any[] = [];
 
-      const interactionRespData = await getHashDitResponse(
-        'hashdit_snap_tx_api_transaction_request',
+    const interactionRespData = await getHashDitResponse(
+      'hashdit_snap_tx_api_transaction_request',
 
-        transactionOrigin,
-        transaction,
-        chainId,
-      );
+      transactionOrigin,
+      transaction,
+      chainId,
+    );
 
-      // Retrieve all addresses from the function's parameters to `targetAddresses[]`. Perform poison detection on these parameters.
-      if (interactionRespData.function_name !== '') {
-        let targetAddresses = [];
-        // Add destination address to targets
-        targetAddresses.push(transaction.to);
-        // Loop through each function parameter
-        for (const param of interactionRespData.function_params) {
-          // Store only the values of type `address`
-          if (param.type == 'address') {
-            targetAddresses.push(param.value);
-          }
-        }
-        const poisonResultArray = addressPoisoningDetection(
-          accounts,
-          targetAddresses,
-        );
-        if (poisonResultArray.length != 0) {
-          contentArray = poisonResultArray;
+    // Retrieve all addresses from the function's parameters to `targetAddresses[]`. Perform poison detection on these parameters.
+    if (interactionRespData.function_name !== '') {
+      let targetAddresses = [];
+      // Add destination address to targets
+      targetAddresses.push(transaction.to);
+      // Loop through each function parameter
+      for (const param of interactionRespData.function_params) {
+        // Store only the values of type `address`
+        if (param.type == 'address') {
+          targetAddresses.push(param.value);
         }
       }
-      const addressRespData = await getHashDitResponse(
-        'internal_address_lables_tags',
-
-        transactionOrigin,
-        transaction,
-        chainId,
+      const poisonResultArray = addressPoisoningDetection(
+        accounts,
+        targetAddresses,
       );
-      if (interactionRespData.overall_risk >= addressRespData.overall_risk) {
-        contentArray.push(
-          heading('Transaction Screening'),
-          text(`**Overall Risk:** ${interactionRespData.overall_risk_title}`),
-          text(`**Risk Overview:** ${interactionRespData.overall_risk_detail}`),
-          text(
-            `**Risk Details:** ${interactionRespData.transaction_risk_detail}`,
-          ),
-          divider(),
-        );
-      } else {
-        contentArray.push(
-          heading('HashDit Screening'), //todo
-          text(`**Overall risk:** ${addressRespData.overall_risk_title}`),
-          text(`**Risk Overview:** ${addressRespData.overall_risk_detail}`),
-          text(`**Risk Details:** ${addressRespData.transaction_risk_detail}`),
-          divider(),
-        );
+      if (poisonResultArray.length != 0) {
+        contentArray = poisonResultArray;
       }
+    }
+    const addressRespData = await getHashDitResponse(
+      'internal_address_lables_tags',
 
-      contentArray.push(heading('URL Risk Information'));
-
-      if (interactionRespData.url_risk >= 2) {
-        contentArray.push(text(`**${interactionRespData.url_risk_title}**`));
-      }
-
+      transactionOrigin,
+      transaction,
+      chainId,
+    );
+    if (interactionRespData.overall_risk >= addressRespData.overall_risk) {
       contentArray.push(
+        heading('Transaction Screening'),
+        text(`**Overall Risk:** ${interactionRespData.overall_risk_title}`),
+        text(`**Risk Overview:** ${interactionRespData.overall_risk_detail}`),
         text(
-          `The URL **${transactionOrigin}** has a risk of **${interactionRespData.url_risk}**`,
+          `**Risk Details:** ${interactionRespData.transaction_risk_detail}`,
         ),
         divider(),
       );
+    } else {
+      contentArray.push(
+        heading('HashDit Screening'), //todo
+        text(`**Overall risk:** ${addressRespData.overall_risk_title}`),
+        text(`**Risk Overview:** ${addressRespData.overall_risk_detail}`),
+        text(`**Risk Details:** ${addressRespData.transaction_risk_detail}`),
+        divider(),
+      );
+    }
 
-      const transactingValue = parseTransactingValue(transaction.value);
-      const nativeToken = getNativeToken(chainId);
+    contentArray.push(heading('URL Risk Information'));
 
-      // Only display Transfer Details if transferring more than 0 native tokens
-      // This is a contract interaction. This check is necessary here because not all contract interactions transfer tokens.
-      if (transactingValue > 0) {
+    if (interactionRespData.url_risk >= 2) {
+      contentArray.push(text(`**${interactionRespData.url_risk_title}**`));
+    }
+
+    contentArray.push(
+      text(
+        `The URL **${transactionOrigin}** has a risk of **${interactionRespData.url_risk}**`,
+      ),
+      divider(),
+    );
+
+    const transactingValue = parseTransactingValue(transaction.value);
+    const nativeToken = getNativeToken(chainId);
+
+    // Only display Transfer Details if transferring more than 0 native tokens
+    // This is a contract interaction. This check is necessary here because not all contract interactions transfer tokens.
+    if (transactingValue > 0) {
+      contentArray.push(
+        heading('Transfer Details'),
+        text('Your Address'),
+        text(transaction.from),
+        text('Amount'),
+        text(`${transactingValue} ${nativeToken}`),
+        text('To'),
+        text(transaction.to),
+        divider(),
+      );
+    }
+
+    // Display function call insight (function names and parameters)
+    if (interactionRespData.function_name !== '') {
+      contentArray.push(
+        heading(`Function Name: ${interactionRespData.function_name}`),
+      );
+      // Loop through each function parameter and display its values
+      for (const param of interactionRespData.function_params) {
         contentArray.push(
-          heading('Transfer Details'),
-          text('Your Address'), text(transaction.from),
-          text('Amount'), text(`${transactingValue} ${nativeToken}`),
-          text('To'), text(transaction.to),
-          divider(),
+          text('Name:'),
+          text(param.name),
+          text('Type:'),
+          text(param.type),
         );
-      }
-
-      // Display function call insight (function names and parameters)
-      if (interactionRespData.function_name !== '') {
-        contentArray.push(
-          heading(`Function Name: ${interactionRespData.function_name}`),
-        );
-        // Loop through each function parameter and display its values
-        for (const param of interactionRespData.function_params) {
-          contentArray.push(
-            text('Name:'), text(param.name),
-            text('Type:'), text(param.type),
-          );
-          // If the parameter is 'address' type, then we use address UI for the value
-          if (param.type == 'address') {
-            contentArray.push(text('Value:'), text(param.value));
-          } else {
-            contentArray.push(text('Value:'), text(param.value));
-          }
-          contentArray.push(divider());
+        // If the parameter is 'address' type, then we use address UI for the value
+        if (param.type == 'address') {
+          contentArray.push(text('Value:'), text(param.value));
+        } else {
+          contentArray.push(text('Value:'), text(param.value));
         }
+        contentArray.push(divider());
       }
-    
+    }
 
     const content = panel(contentArray);
     return { content };
